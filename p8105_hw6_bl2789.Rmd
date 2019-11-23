@@ -140,21 +140,34 @@ boot_straps = weather_df %>%
                 results1 = map(fitted,broom::tidy),
                 results2 = map(fitted,broom::glance))%>%
               select(-strap, -fitted)
-  
-              
-  
-
-
-
-
-lm(tmax~tmin,data = weather_df)%>% 
-  broom::tidy() %>% 
-  knitr::kable(digits = 3)
-
-lm(tmax~tmin,data = weather_df)%>% 
-  broom::glance()%>%
-  knitr::kable(digits = 3)
+ 
 ```
+
+two estimates:
+
+```{r}
+ 
+r_square = boot_straps %>%
+              unnest(results2)%>%
+              select(.id,r.squared)%>%
+              janitor::clean_names()
+
+             
+log = boot_straps %>%
+      unnest(results1)%>%
+      select(.id, term, estimate)%>%
+      pivot_wider(names_from = "term",values_from = "estimate")%>% 
+      janitor::clean_names() %>% 
+      mutate(log = log(intercept * tmin))%>%
+      select(id,log)
+
+final = left_join(r_square,log)
+              
+```
+
+
+
+
 
 
 
