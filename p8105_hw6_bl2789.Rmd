@@ -162,6 +162,25 @@ log = boot_straps %>%
       select(id,log)
 
 final = left_join(r_square,log)
+ggplot(final)+
+   geom_density(aes(x = r_squared),fill = "red",alpha = 0.4)+
+  labs(
+    title = " Distribution of estimated R squared",
+    x = "R squared",
+    y = "Density",
+    caption = "Data from boot straps")
+  
+ggplot(final)+
+   geom_density(aes(x = log),fill = "sky blue",alpha = 0.7)+
+    labs(
+    title = " Distribution of estimated log(β_0*β_1)",
+    x = "log(β_0*β_1)",
+    y = "Density",
+    caption = "Data from boot straps")
+                  
+  
+
+
               
 ```
 
