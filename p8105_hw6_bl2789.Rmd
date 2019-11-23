@@ -55,11 +55,21 @@ Plot:
 
 plot = as_tibble(add_residuals(fit,data=add_predictions(fit,data=birth_weight)))
 ggplot(plot, aes(x=pred,y=resid))+
-  geom_point(alpha = 0.4)
+  geom_point(alpha = 0.4)+
+  stat_smooth(method = "lm") +
+  labs(
+    title = "The model residuals against fitted values",
+    x = "Prediction",
+    y = "Residuals",
+    caption = "Data from birth weight")
+                  
+
   
 
 ```
 
+
+The Residual Plot seems like a flat line by 0, however it is residual varies too much from -1000 to 2000. Residuals are not symmetrically distributed, tending to cluster towards the right of the plot.
 
 
 Other two models:
@@ -111,7 +121,20 @@ cv_df %>%
   summarise(mean_rmse = mean(rmse))%>%
   pivot_wider(names_from = model,values_from = mean_rmse)%>%
   kableExtra::kable(type = "markdown")
+  
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model))%>%
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
+
+
+Since the first model, which we selected using stepwise backward selection according to AIC score, has the lowest cross-validation predicted error for mean and overall distribution. Our model is a better choice.
 
 #### Problem 2
 ```{r}
@@ -133,6 +156,8 @@ weather_df =
 Simple linear regression
 
 ```{r}
+
+set.seed(233)
 boot_straps = weather_df %>% 
               modelr::bootstrap(n = 5000)%>%
               mutate(
@@ -184,11 +209,25 @@ ggplot(final)+
               
 ```
 
+* The R^2 is pretty large for the boot straps data and has the tmin could explain decently for tmax in the simple linear regression model.  
+* The log(β_0*β_1) estimates' distribution followed the bell shape, which implies the validation of normality.
 
 
 
+##### b
 
+Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval
 
+* **R_squared**
+```{r}
+# R_squared
+c(quantile(pull(final,r_squared), probs = 0.025), quantile(pull(final,r_squared), probs = 0.975))
+```
+
+* **log(β_0*β_1)**
+```{r}
+c(quantile(pull(final,log), probs = 0.025), quantile(pull(final,log), probs = 0.975))
+```
 
 
 
