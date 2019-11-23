@@ -33,22 +33,32 @@ Loaded and checked there is `r sum(is.na(birth_weight))` NAs in the imported dat
 Backward elimination example using step, 
 Fristly remove the entire categorical variable, since it doesnot make much sense if the model selection only retain some of the  multiple levels.
 ```{r}
-mod = lm(bwt~.-frace-mrace,data = birth_weight)
+mod = lm(bwt~.-babysex-frace-mrace,data = birth_weight)
 back = step(mod,direction = c("backward")) 
 summary(back)
 ```
+
+
+The model I selected by Backward selection based on AIC is 
+
+```{r}
+fit = lm(bwt~bhead+blength+delwt+fincome+gaweeks+menarche+mheight+momage+parity+ppwt+smoken,data = birth_weight)
+fit
+summary(fit)
+```
+
+
 
 Plot:
 
 ```{r}
 
-plot = as_tibble(add_residuals(mod,data=add_predictions(mod,data=birth_weight)))
+plot = as_tibble(add_residuals(fit,data=add_predictions(fit,data=birth_weight)))
 ggplot(plot, aes(x=pred,y=resid))+
   geom_point(alpha = 0.4)
   
 
 ```
-
 
 
 
@@ -58,11 +68,53 @@ Other two models:
 fit_1 = lm(bwt~blength+gaweeks,data = birth_weight)
 fit_2 = lm(bwt~bhead*blength*babysex,data = birth_weight)
 
-summary(fit_1)
-
-summary(fit_2)
 ```
 
 Cross validation:
+
+```{r}
+
+set.seed(1)
+cv_df = 
+  crossv_mc(birth_weight,100) 
+cv_df =
+  cv_df %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble))
+```
+
+
+```{r}
+cv_df = 
+  cv_df %>% 
+  mutate(fit = map(train,~lm(bwt~bhead+blength 
+        +delwt+fincome+gaweeks+menarche+mheight+momage+parity+ppwt+smoken,data = .)),
+        fit_1 = map(train,~lm(bwt~blength+gaweeks,data = .)),
+        fit_2 = map(train,~lm(bwt~bhead*blength*babysex,data = .))) %>% 
+  mutate(rmse_fit = map2_dbl(fit, test, ~rmse(model = .x, data = .y)),
+         rmse_fit_1 = map2_dbl(fit_1, test, ~rmse(model = .x, data = .y)),
+         rmse_fit_2 = map2_dbl(fit_2, test, ~rmse(model = .x, data = .y)))
+```
+
+
+
+```{r}
+cv_df %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model))%>%
+  group_by(model)%>%
+  summarise(mean_rmse = mean(rmse))%>%
+  pivot_wider(names_from = model,values_from = mean_rmse)%>%
+  kableExtra::kable(type = "markdown")
+```
+
+
+
+
 
 
