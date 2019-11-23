@@ -153,7 +153,7 @@ weather_df =
 
 ##### a
 
-Simple linear regression
+**Simple linear regression**
 
 ```{r}
 
@@ -216,15 +216,15 @@ ggplot(final)+
 
 ##### b
 
-Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval
+**Identify the 2.5% and 97.5% quantiles to provide a 95% confidence interval**
 
-* **R_squared**
+* R_squared
 ```{r}
 # R_squared
 c(quantile(pull(final,r_squared), probs = 0.025), quantile(pull(final,r_squared), probs = 0.975))
 ```
 
-* **log(β_0*β_1)**
+* log(β_0*β_1)
 ```{r}
 c(quantile(pull(final,log), probs = 0.025), quantile(pull(final,log), probs = 0.975))
 ```
