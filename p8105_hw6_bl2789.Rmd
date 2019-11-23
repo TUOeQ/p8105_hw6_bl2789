@@ -9,6 +9,8 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readr)
+library(faraway)
+library(modelr)
 
 ```
 
@@ -28,6 +30,39 @@ str(birth_weight)
 Loaded and checked there is `r sum(is.na(birth_weight))` NAs in the imported dataset for the regression analysis.
 
 ##### b
+Backward elimination example using step, 
+Fristly remove the entire categorical variable, since it doesnot make much sense if the model selection only retain some of the  multiple levels.
+```{r}
+mod = lm(bwt~.-frace-mrace,data = birth_weight)
+back = step(mod,direction = c("backward")) 
+summary(back)
+```
 
+Plot:
+
+```{r}
+
+plot = as_tibble(add_residuals(mod,data=add_predictions(mod,data=birth_weight)))
+ggplot(plot, aes(x=pred,y=resid))+
+  geom_point(alpha = 0.4)
+  
+
+```
+
+
+
+
+Other two models:
+
+```{r}
+fit_1 = lm(bwt~blength+gaweeks,data = birth_weight)
+fit_2 = lm(bwt~bhead*blength*babysex,data = birth_weight)
+
+summary(fit_1)
+
+summary(fit_2)
+```
+
+Cross validation:
 
 
