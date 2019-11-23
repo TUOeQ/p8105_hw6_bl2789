@@ -1,0 +1,33 @@
+---
+title: "Homework 6"
+author: "Bingkun Luo"
+date: "11/22/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+
+```
+
+#### Problem 1
+##### a
+
+```{r}
+birth_weight = read_csv("./data/birthweight.csv")%>%
+                mutate(babysex = as.factor(babysex),
+                       frace = as.factor(frace),
+                       malform = as.factor(malform),
+                       mrace = as.factor(mrace))
+
+str(birth_weight)
+```
+
+Loaded and checked there is `r sum(is.na(birth_weight))` NAs in the imported dataset for the regression analysis.
+
+##### b
+
+
+
